@@ -1,7 +1,7 @@
 # UnityToolExtensions
 A set of tool extensions for the Unity package manager
 
-1- Randomize transform
+1- Randomize transform \n
 Change the position, rotation or scale by random values in specific ranges.
 
 2- Drape object
