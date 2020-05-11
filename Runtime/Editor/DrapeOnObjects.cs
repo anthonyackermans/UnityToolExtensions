@@ -20,8 +20,9 @@ public class DrapeOnObjects : EditorWindow
     public ObjectGetter ObjectGetterToProjectOn = new ObjectGetter();
     private Vector3 _raycastDirection;
     private string _logBox;
+
     // Add menu item 
-    [MenuItem("RMDY AR VR/Drape on objects")]
+    [MenuItem("Tools/Drape on objects")]
     public static void ShowWindow()
     {
         EditorWindow.GetWindow(typeof(DrapeOnObjects));

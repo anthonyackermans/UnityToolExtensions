@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// Class with an editor UI to help select objects in the scene based on name, tagname or current selection
+/// </summary>
 public class ObjectGetter
 {
 

@@ -49,7 +49,7 @@ public class RandomTransformer : EditorWindow
 
 
     // Add menu item 
-    [MenuItem("RMDY AR VR/RandomTransformer")]
+    [MenuItem("Tools/RandomTransformer")]
     public static void ShowWindow()
     {
         EditorWindow.GetWindow(typeof(RandomTransformer));
