@@ -1,5 +1,6 @@
 # UnityToolExtensions
-A set of tool extensions for the Unity package manager.
+A set of tool extensions for Unity 2019 and up.<br>
+Easy to install with the Unity Package Manager
 
 <H1>Installation</H1>
 - Copy the github link https://github.com/anthonyackermans/UnityToolExtensions.git <br>
