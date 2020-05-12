@@ -6,6 +6,7 @@ Easy to install with the Unity Package Manager
 - Copy the github link https://github.com/anthonyackermans/UnityToolExtensions.git <br>
 - Paste the link in Unity's Package Manager (Package Manager > Add package from Git's URL)<br>
 - You will see "Tool Extensions" in the packages list. Select it and press install.<br>
+- Access the tools via the "tools" in the menu bar
 
 <H1>Tools</H1>
 <H2>1 - Randomize transform</H2><br>
