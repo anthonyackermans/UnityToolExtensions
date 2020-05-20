@@ -1,17 +1,22 @@
 # UnityToolExtensions
-A set of tool extensions for the Unity package manager
+A set of tool extensions for Unity 2019 and up.<br>
+Easy to install with the Unity Package Manager
 
 <H1>Installation</H1>
-- Clone the github link https://github.com/anthonyackermans/UnityToolExtensions.git <br>
+- Copy the github link https://github.com/anthonyackermans/UnityToolExtensions.git <br>
 - Paste the link in Unity's Package Manager (Package Manager > Add package from Git's URL)<br>
 - You will see "Tool Extensions" in the packages list. Select it and press install.<br>
+- Access the tools via the "tools" in the menu bar
 
 <H1>Tools</H1>
-1- Randomize transform<br>
-Change the position, rotation or scale by random values in specific ranges.
+<H2>1 - Randomize transform</H2><br>
+<img src="images/randomtransform_screenshot.jpg" width="300"></img>
+Change the position, rotation or scale by random values in specific ranges.<br>
 
-2- Drape object<br>
-Move any object in a worldspace axis until it collides with specific objects. 
+<H2>2 - Drape object</H2><br>
+<img src="images/drapeobjects_screenshot.jpg" width="300"></img>
+Move any object in a worldspace axis until it collides with specific objects. <br>
 
-3- Renamer <br>
-Batch rename your objects in the scene
+<H2>3 - Renamer</H2><br>
+<img src="images/renamer_screenshot.jpg" width="300"></img>
+Batch rename your objects in the scene<br>
