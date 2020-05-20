@@ -114,6 +114,8 @@ public class ObjectGetter
             EditorGUILayout.EndHorizontal();
         }
 
+        
+
         void SearchByName()
         {
             EditorGUILayout.BeginHorizontal();
@@ -172,5 +174,21 @@ public class ObjectGetter
         }
         Undo.RegisterCompleteObjectUndo(undoableObjects, undoLabel);
         Undo.FlushUndoRecordObjects();
+    }
+
+    public static void RecordeUndoForSelectedObjects(List<GameObject> gameobjects, string undoLabel)
+    {
+        Transform[] undoableObjects = new Transform[gameobjects.Count];
+        for (int i = 0; i < gameobjects.Count; i++)
+        {
+            undoableObjects[i] = gameobjects[i].GetComponent<Transform>();
+        }
+        Undo.RegisterCompleteObjectUndo(undoableObjects, undoLabel);
+        Undo.FlushUndoRecordObjects();
+    }
+
+    public void ClearList()
+    {
+        _transformElements.Clear();
     }
 }

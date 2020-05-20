@@ -1,4 +1,5 @@
 ﻿// Anthony Ackermans
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -20,6 +21,8 @@ public class DrapeOnObjects : EditorWindow
     public ObjectGetter ObjectGetterToProjectOn = new ObjectGetter();
     private Vector3 _raycastDirection;
     private string _logBox;
+    int objectsHit = 0;
+    int objectsMissed = 0;
 
     // Add menu item 
     [MenuItem("Tools/Drape on objects")]
@@ -30,8 +33,6 @@ public class DrapeOnObjects : EditorWindow
 
     private void AlignObjectToNormal(Axis projectionAxis)
     {
-        int objectsHit = 0;
-        int objectsMissed = 0;
 
         switch (projectionAxis)
         {
@@ -50,19 +51,35 @@ public class DrapeOnObjects : EditorWindow
 
         foreach (var transfomElementtoMove in _transformElementsToMove)
         {
-            RaycastHit hit;
+            RaycastHit[] hits;
 
+            hits = Physics.RaycastAll(transfomElementtoMove.TheGameObject.transform.position, _raycastDirection, 100.0F);
+            foreach (var item in hits)
+            {
+                Debug.Log(item);
+            }
 
-            if (Physics.Raycast(transfomElementtoMove.TheGameObject.transform.position, _raycastDirection, out hit))
-                foreach (var transformElementtoProjectTo in _transformElementsToProjectOn)
+            if (hits != null)
+            {
+                foreach (var hit in hits)
                 {
-                    if (transformElementtoProjectTo.TheGameObject.transform == hit.transform)
+                    foreach (var transformElementtoProjectTo in _transformElementsToProjectOn)
                     {
-                        transfomElementtoMove.TheGameObject.transform.position = hit.point;
-                        objectsHit++;
-                    }                  
-                }
-            else objectsMissed++;
+                        if (transformElementtoProjectTo.TheGameObject.transform == hit.transform)
+                        {
+                            transfomElementtoMove.TheGameObject.transform.position = hit.point;
+                            objectsHit++;
+                            break;
+                        }
+                    }
+                }      
+            }
+            else
+            {
+                objectsMissed++;
+            }
+            
+            
         }
         _logBox = $"{objectsHit} objects draped \n{objectsMissed} objects missed";
     }
@@ -78,10 +95,24 @@ public class DrapeOnObjects : EditorWindow
 
         GUILayout.FlexibleSpace();
         EditorGUILayout.LabelField(_logBox, EditorStyles.helpBox, GUILayout.Height(30));
+        if (GUILayout.Button("Reset Values"))
+        {
+            ResetValues();
+        }
         if (GUILayout.Button("Apply"))
         {
             ObjectGetter.RecordeUndoForSelectedObjects(_transformElementsToMove, "Project objects");
             AlignObjectToNormal(_projectionAxis);
         }
+    }
+
+    private void ResetValues()
+    {
+        objectsHit = 0;
+        objectsMissed = 0;
+        _logBox = "";
+        ObjectGetterToMove.ClearList();
+        ObjectGetterToProjectOn.ClearList();
+        
     }
 }
