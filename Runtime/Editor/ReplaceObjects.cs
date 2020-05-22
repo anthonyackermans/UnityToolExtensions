@@ -90,19 +90,37 @@ public class ReplaceObjects : EditorWindow
         format = _transformElementsToReplace.Count <= 1000 ? "{0:00}" : "{0:000}"; // Format with leading zeros depending on the amount of selected objects
         GameObject instantiatedObject;
 
+        PrefabAssetType assetType = PrefabUtility.GetPrefabAssetType(_ReplacementObject);
+
         foreach (var te in _transformElementsToReplace)
         {
             bool hasparent = te.TheGameObject.transform.parent != null;
 
-            if (hasparent)
+            if (assetType == PrefabAssetType.NotAPrefab)
             {
-                instantiatedObject = GameObject.Instantiate(_ReplacementObject, te.TheGameObject.transform.position, Quaternion.identity, te.TheGameObject.transform.parent);
+                if (hasparent)
+                {
+                    instantiatedObject = GameObject.Instantiate(_ReplacementObject, te.TheGameObject.transform.position, Quaternion.identity, te.TheGameObject.transform.parent);
+                }
+                else
+                {
+                    instantiatedObject = GameObject.Instantiate(_ReplacementObject, te.TheGameObject.transform.position, Quaternion.identity);
+
+                }
             }
             else
             {
-                instantiatedObject = GameObject.Instantiate(_ReplacementObject, te.TheGameObject.transform.position, Quaternion.identity);
-
+                if (hasparent)
+                {
+                    instantiatedObject = (GameObject)PrefabUtility.InstantiatePrefab(_ReplacementObject, te.TheGameObject.transform.parent);                   
+                }
+                else
+                {
+                    instantiatedObject = (GameObject)PrefabUtility.InstantiatePrefab(_ReplacementObject);
+                }
+                instantiatedObject.transform.localPosition = te.originalPosition;
             }
+           
 
             
 
