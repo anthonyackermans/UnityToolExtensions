@@ -1,6 +1,6 @@
 # UnityToolExtensions
 A set of tool extensions for Unity 2019 and up.<br>
-Easy to install with the Unity Package Manager
+Easy to install with the Unity Package Manager.<br>
 All tools are undoable
 
 <H1>Installation</H1>
