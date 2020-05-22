@@ -1,6 +1,7 @@
 # UnityToolExtensions
 A set of tool extensions for Unity 2019 and up.<br>
-Easy to install with the Unity Package Manager
+Easy to install with the Unity Package Manager.<br>
+All tools are undoable
 
 <H1>Installation</H1>
 - Copy the github link https://github.com/anthonyackermans/UnityToolExtensions.git <br>
@@ -20,3 +21,7 @@ Move any object in a worldspace axis until it collides with specific objects. <b
 <H2>3 - Renamer</H2><br>
 <img src="images/renamer_screenshot.jpg" width="300"></img>
 Batch rename your objects in the scene<br>
+
+<H2>4 - Replace objects</H2><br>
+<img src="images/replaceobjects_screenshot.jpg" width="300"></img>
+Replace a selection of objects with a specified object or prefab<br>
