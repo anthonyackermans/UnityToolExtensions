@@ -17,7 +17,8 @@ namespace ToolExtensions
         private RelationType _positionType = RelationType.Relative, _rotationType = RelationType.Absolute, _scaleType = RelationType.Absolute;
         public static GameObject[] _gameObjects;
         public static List<TransformElement> _transformElements = new List<TransformElement>();
-        List<Collider> allcollidersInSelection = new List<Collider>();
+        List<Collider> _allcollidersInSelection = new List<Collider>();
+        List<MeshRenderer> _allMeshRenderers = new List<MeshRenderer>();
         public static List<Transform> _originalTransforms; // Keep a list of all the transforms before modifying them.
         private bool showPositionOptions;
         public Vector3 MaximunPositionExtends;
@@ -44,6 +45,9 @@ namespace ToolExtensions
         private bool _showSelectedObjects;
         private Vector2 scrollPos;
         string[] _searchOptions = new string[] { "Manual selection", "Contains name", "By tag" };
+        string[] _overlapOptions = new string[] { "Based on colliders", "Based on MeshRenderers" };
+        int _overlapOptionsIndex = 0;
+        private bool _addChildren;
         int _searchOptionsIndex = 0;
         private string _TagSearchField = "Untagged";
         private string _nameSearchField;
@@ -220,26 +224,52 @@ namespace ToolExtensions
             UtilitiesToolExtensions.DrawSplitter();
 
             EditorGUILayout.LabelField("Options", EditorStyles.boldLabel);
-            _interCollision = EditorGUILayout.Toggle("Avoid intercollision", _interCollision);
+
+            _interCollision = EditorGUILayout.BeginToggleGroup("Avoid overlap", _interCollision);
+            EditorGUILayout.BeginHorizontal();
+            _overlapOptionsIndex = EditorGUILayout.Popup(_overlapOptionsIndex, _overlapOptions);
+            _addChildren = EditorGUILayout.Toggle("Include children", _addChildren);
+            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.EndHorizontal();
+            if (GUILayout.Button("Reset Values"))
+            {
+                ResetValues();
+            }
             if (GUILayout.Button("Apply"))
             {
                 RecordeUndoForSelectedObjects();
-                allcollidersInSelection.Clear();
+                _allcollidersInSelection.Clear();
+                _allMeshRenderers.Clear();
 
 
 
                 foreach (var transformElement in _transformElements)
                 {
-                    if (transformElement.TheGameObject.GetComponent<Collider>() != null)
+                    if (_overlapOptionsIndex == 0) // Use colliders
                     {
-                        allcollidersInSelection.Add(transformElement.TheGameObject.GetComponent<Collider>());
+                        if (transformElement.TheGameObject.GetComponent<Collider>() != null)
+                        {
+                            _allcollidersInSelection.Add(transformElement.TheGameObject.GetComponent<Collider>());
+                        }
                     }
+
+                    if (_overlapOptionsIndex == 1) // Use meshrenderers
+                    {
+                        if (transformElement.TheGameObject.GetComponent<MeshRenderer>() != null)
+                        {
+                            _allMeshRenderers.Add(transformElement.TheGameObject.GetComponent<MeshRenderer>());
+                        }
+                    }
+
                 }
 
                 foreach (var transformElement in _transformElements)
                 {
+                    bool collisionResult = false;
+                    int iteration = 0;
                     do
                     {
+
                         if (_randomizePosition)
                         {
 
@@ -303,9 +333,41 @@ namespace ToolExtensions
                                     break;
                             }
                         }
+                        if (_overlapOptionsIndex == 0)
+                        {
+                            if (_addChildren)
+                            {
+                                collisionResult = CheckIntercollisionChildren(transformElement.TheGameObject, typeof(Collider));
 
+                            }
+                            else
+                            {
+                                collisionResult = CheckIntercollision(transformElement.TheGameObject.GetComponent<Collider>());
+
+                            }
+
+                        }
+                        else if (_overlapOptionsIndex == 1)
+                        {
+                            if (_addChildren)
+                            {
+                                collisionResult = CheckIntercollisionChildren(transformElement.TheGameObject, typeof(MeshRenderer));
+
+                            }
+                            else
+                            {
+                                collisionResult = CheckIntercollision(transformElement.TheGameObject.GetComponent<MeshRenderer>());
+
+                            }
+                        }
+                        iteration++;
+                        if (iteration >= 100)
+                        {
+                            Debug.Log($"Couldn't fit {transformElement.TheGameObject.name} after 100 tries");
+                        }
                     }
-                    while (CheckIntercollision(transformElement.TheGameObject.GetComponent<Collider>()) && _interCollision);
+
+                    while (collisionResult && _interCollision && iteration < 100);
                 }
 
 
@@ -314,6 +376,102 @@ namespace ToolExtensions
 
 
         }
+
+        private void ResetValues()
+        {
+            _transformElements.Clear();
+            _randomizePosition = false;
+            _randomizerotation = false;
+            _randomizeScale = false;
+            _interCollision = false;
+            _searchOptionsIndex = 0;
+        }
+
+        private bool CheckIntercollisionChildren(GameObject theGameObject, Type type)
+        {
+            Bounds bounds = new Bounds(); // the bounds of the single object
+            if (type == typeof(Collider))
+            {
+                Collider[] allColliders = theGameObject.GetComponentsInChildren<Collider>();
+                foreach (var collider in allColliders)
+                {
+                    if (bounds.center == Vector3.zero)
+                    {
+                        bounds = collider.bounds;
+                    }
+                    else
+                    {
+
+                        bounds.Encapsulate(collider.bounds);
+
+                    }
+                }
+                
+            }
+            else if (type == typeof(MeshRenderer))
+            {
+                MeshRenderer[] allMeshRenderers = theGameObject.GetComponentsInChildren<MeshRenderer>();
+                foreach (var mr in allMeshRenderers)
+                {
+                    if (bounds.center == Vector3.zero)
+                    {
+                        bounds = mr.bounds;
+                    }
+                    bounds.Encapsulate(mr.bounds);
+                }
+            }
+
+
+            foreach (var go in _transformElements)
+            {
+                if (theGameObject == go.TheGameObject) continue; // Avoid comparing same objects
+                Bounds boundsCompare = new Bounds();
+                if (type == typeof(Collider))
+                {
+                    Collider[] allColliders = go.TheGameObject.GetComponentsInChildren<Collider>();
+                    foreach (var collider in allColliders)
+                    {
+                        if (boundsCompare.center == Vector3.zero)
+                        {
+                            boundsCompare = collider.bounds;
+                        }
+                        else
+                        {
+                            boundsCompare.Encapsulate(collider.bounds);
+
+                        }
+                        
+                    }
+                }
+                else if (type == typeof(MeshRenderer))
+                {
+                    MeshRenderer[] allMeshRenderers = go.TheGameObject.GetComponentsInChildren<MeshRenderer>();
+                    foreach (var mr in allMeshRenderers)
+                    {
+                        if (boundsCompare.center == Vector3.zero)
+                        {
+                            boundsCompare = mr.bounds;
+                        }
+                        else
+                        {
+                            boundsCompare.Encapsulate(mr.bounds);
+
+                        }
+                    }
+                }
+
+
+                if (bounds.Intersects(boundsCompare))
+                {
+                    return true;
+                }
+            }
+            return false;
+
+
+        }
+
+
 
         /// <summary>
         /// Record the Transform state to allow the undo operation
@@ -436,7 +594,7 @@ namespace ToolExtensions
 
         private bool CheckIntercollision(Collider currentCollider)
         {
-            foreach (var colliderInSelection in allcollidersInSelection)
+            foreach (var colliderInSelection in _allcollidersInSelection)
             {
                 if (colliderInSelection != currentCollider && currentCollider.bounds.Intersects(colliderInSelection.bounds))
                 {
@@ -448,6 +606,19 @@ namespace ToolExtensions
             return false;
         }
 
+        private bool CheckIntercollision(MeshRenderer currentMeshRenderer)
+        {
+            foreach (var mrInSelection in _allMeshRenderers)
+            {
+                if (mrInSelection != currentMeshRenderer && currentMeshRenderer.bounds.Intersects(mrInSelection.bounds))
+                {
+                    Debug.Log($"MeshRenderer between {currentMeshRenderer.gameObject.name} and {mrInSelection.gameObject.name}. Replacing object");
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void SetRangeValues(ref float minRange, ref float maxRange, ref float minLimit, ref float maxLimit)
         {
             minRange = (float)EditorGUILayout.DoubleField(Math.Round(minRange, 2), GUILayout.MaxWidth(70));
@@ -455,4 +626,6 @@ namespace ToolExtensions
             maxRange = (float)EditorGUILayout.DoubleField(Math.Round(maxRange, 2), GUILayout.MaxWidth(70));
         }
     }
+
+    
 }
