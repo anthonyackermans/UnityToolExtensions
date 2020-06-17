@@ -5,114 +5,118 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Move objects in a world space axis until it collides with an object. 
-/// Ideal for draping objects on a surface, like trees on a terrain.
-/// </summary>
-public class DrapeOnObjects : EditorWindow
+namespace ToolExtensions
 {
-    // FIELDS
-    public enum Axis { X, Y, Z };
-    private Axis _projectionAxis = Axis.Y;
-    private bool _inverseAxis;
-    private List<TransformElement> _transformElementsToMove = new List<TransformElement>();
-    private List<TransformElement> _transformElementsToProjectOn = new List<TransformElement>();
-    public ObjectGetter ObjectGetterToMove = new ObjectGetter();
-    public ObjectGetter ObjectGetterToProjectOn = new ObjectGetter();
-    private Vector3 _raycastDirection;
-    private string _logBox;
-    int objectsHit = 0;
-    int objectsMissed = 0;
 
-    // Add menu item 
-    [MenuItem("Tools/Drape on objects")]
-    public static void ShowWindow()
+    /// <summary>
+    /// Move objects in a world space axis until it collides with an object. 
+    /// Ideal for draping objects on a surface, like trees on a terrain.
+    /// </summary>
+    public class DrapeOnObjects : EditorWindow
     {
-        EditorWindow.GetWindow(typeof(DrapeOnObjects));
-    }
+        // FIELDS
+        public enum Axis { X, Y, Z };
+        private Axis _projectionAxis = Axis.Y;
+        private bool _inverseAxis;
+        private List<TransformElement> _transformElementsToMove = new List<TransformElement>();
+        private List<TransformElement> _transformElementsToProjectOn = new List<TransformElement>();
+        public ObjectGetter ObjectGetterToMove = new ObjectGetter();
+        public ObjectGetter ObjectGetterToProjectOn = new ObjectGetter();
+        private Vector3 _raycastDirection;
+        private string _logBox;
+        int objectsHit = 0;
+        int objectsMissed = 0;
 
-    private void AlignObjectToNormal(Axis projectionAxis)
-    {
-
-        switch (projectionAxis)
+        // Add menu item 
+        [MenuItem("Tools/Drape on objects")]
+        public static void ShowWindow()
         {
-            case Axis.X:
-                _raycastDirection = _inverseAxis == true ? Vector3.left : Vector3.right;
-                break;
-            case Axis.Y:
-                _raycastDirection = _inverseAxis == true ? Vector3.down : Vector3.up;
-                break;
-            case Axis.Z:
-                _raycastDirection = _inverseAxis == true ? Vector3.back : Vector3.forward;
-                break;
-            default:
-                break;
+            GetWindow(typeof(DrapeOnObjects));
         }
 
-        foreach (var transfomElementtoMove in _transformElementsToMove)
+        private void AlignObjectToNormal(Axis projectionAxis)
         {
-            RaycastHit[] hits;
 
-            hits = Physics.RaycastAll(transfomElementtoMove.TheGameObject.transform.position, _raycastDirection, 100.0F);
-            foreach (var item in hits)
+            switch (projectionAxis)
             {
-                Debug.Log(item);
+                case Axis.X:
+                    _raycastDirection = _inverseAxis == true ? Vector3.left : Vector3.right;
+                    break;
+                case Axis.Y:
+                    _raycastDirection = _inverseAxis == true ? Vector3.down : Vector3.up;
+                    break;
+                case Axis.Z:
+                    _raycastDirection = _inverseAxis == true ? Vector3.back : Vector3.forward;
+                    break;
+                default:
+                    break;
             }
 
-            if (hits != null)
+            foreach (var transfomElementtoMove in _transformElementsToMove)
             {
-                foreach (var hit in hits)
+                RaycastHit[] hits;
+
+                hits = Physics.RaycastAll(transfomElementtoMove.TheGameObject.transform.position, _raycastDirection, 100.0F);
+                foreach (var item in hits)
                 {
-                    foreach (var transformElementtoProjectTo in _transformElementsToProjectOn)
+                    Debug.Log(item);
+                }
+
+                if (hits != null)
+                {
+                    foreach (var hit in hits)
                     {
-                        if (transformElementtoProjectTo.TheGameObject.transform == hit.transform)
+                        foreach (var transformElementtoProjectTo in _transformElementsToProjectOn)
                         {
-                            transfomElementtoMove.TheGameObject.transform.position = hit.point;
-                            objectsHit++;
-                            break;
+                            if (transformElementtoProjectTo.TheGameObject.transform == hit.transform)
+                            {
+                                transfomElementtoMove.TheGameObject.transform.position = hit.point;
+                                objectsHit++;
+                                break;
+                            }
                         }
                     }
-                }      
+                }
+                else
+                {
+                    objectsMissed++;
+                }
+
+
             }
-            else
+            _logBox = $"{objectsHit} objects draped \n{objectsMissed} objects missed";
+        }
+
+        private void OnGUI()
+        {
+            _transformElementsToMove = ObjectGetterToMove.ObjectSelectionShowUi("Search for transforms");
+            EditorGUILayout.Space(10);
+            _transformElementsToProjectOn = ObjectGetterToProjectOn.ObjectSelectionShowUi("Project on transforms");
+            EditorGUILayout.Space(10);
+            _projectionAxis = (Axis)EditorGUILayout.EnumPopup("Projection axis", _projectionAxis);
+            _inverseAxis = EditorGUILayout.Toggle("Inverse axis", _inverseAxis);
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField(_logBox, EditorStyles.helpBox, GUILayout.Height(30));
+            if (GUILayout.Button("Reset Values"))
             {
-                objectsMissed++;
+                ResetValues();
             }
-            
-            
+            if (GUILayout.Button("Apply"))
+            {
+                ObjectGetter.RecordeUndoForSelectedObjects(_transformElementsToMove, "Project objects");
+                AlignObjectToNormal(_projectionAxis);
+            }
         }
-        _logBox = $"{objectsHit} objects draped \n{objectsMissed} objects missed";
-    }
 
-    private void OnGUI()
-    {
-        _transformElementsToMove = ObjectGetterToMove.ObjectSelectionShowUi("Search for transforms");
-        EditorGUILayout.Space(10);
-        _transformElementsToProjectOn = ObjectGetterToProjectOn.ObjectSelectionShowUi("Project on transforms");
-        EditorGUILayout.Space(10);
-        _projectionAxis = (Axis)EditorGUILayout.EnumPopup("Projection axis", _projectionAxis);
-        _inverseAxis = EditorGUILayout.Toggle("Inverse axis", _inverseAxis);
-
-        GUILayout.FlexibleSpace();
-        EditorGUILayout.LabelField(_logBox, EditorStyles.helpBox, GUILayout.Height(30));
-        if (GUILayout.Button("Reset Values"))
+        private void ResetValues()
         {
-            ResetValues();
-        }
-        if (GUILayout.Button("Apply"))
-        {
-            ObjectGetter.RecordeUndoForSelectedObjects(_transformElementsToMove, "Project objects");
-            AlignObjectToNormal(_projectionAxis);
-        }
-    }
+            objectsHit = 0;
+            objectsMissed = 0;
+            _logBox = "";
+            ObjectGetterToMove.ClearList();
+            ObjectGetterToProjectOn.ClearList();
 
-    private void ResetValues()
-    {
-        objectsHit = 0;
-        objectsMissed = 0;
-        _logBox = "";
-        ObjectGetterToMove.ClearList();
-        ObjectGetterToProjectOn.ClearList();
-        
+        }
     }
 }

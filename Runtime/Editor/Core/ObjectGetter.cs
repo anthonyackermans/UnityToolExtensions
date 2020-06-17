@@ -31,9 +31,8 @@ namespace ToolExtensions
 
         public List<TransformElement> ObjectSelectionShowUi(string headerText)
         {
+            EditorGUILayout.BeginVertical("helpbox");
             EditorGUILayout.LabelField(headerText, EditorStyles.boldLabel);
-
-
             _searchOptionsIndex = EditorGUILayout.Popup(_searchOptionsIndex, _searchOptions);
 
             switch (_searchOptionsIndex)
@@ -162,6 +161,7 @@ namespace ToolExtensions
                 }
                 EditorGUILayout.EndHorizontal();
             }
+            EditorGUILayout.EndVertical();
             return _transformElements;
         }
 

@@ -55,7 +55,7 @@ namespace ToolExtensions
 
             foreach (var go in allUnfilteredObjects)
             {
-                if (go.hideFlags == HideFlags.None)
+                if (go.hideFlags == HideFlags.None && !EditorUtility.IsPersistent(go.transform.root.gameObject)) // Make sure to not add prefabs from the project view and only count those in the scene
                 {
                     allfilteredObjectsList.Add(go);
                 }

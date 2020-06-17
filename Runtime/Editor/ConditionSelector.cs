@@ -40,7 +40,7 @@ namespace ToolExtensions
             FoldoutHeaderToggle _foldoutTag = new FoldoutHeaderToggle("Contains tag", new HasTag());
             FoldoutHeaderToggle _foldoutLayer = new FoldoutHeaderToggle("Contains layer", new HasLayer());
             FoldoutHeaderToggle _foldoutStaticActive = new FoldoutHeaderToggle("Gameobject property", new StaticOrActive());
-            FoldoutHeaderToggle _foldoutContainsMaterial = new FoldoutHeaderToggle("Contains Material", new ContainsMaterial());
+            FoldoutHeaderToggle _foldoutContainsMaterial = new FoldoutHeaderToggle("Contains material", new ContainsMaterial());
 
             allFoldoutHeadertoggles.Add(_foldoutTriangleCount);
             allFoldoutHeadertoggles.Add(_foldoutTag);
@@ -113,7 +113,8 @@ namespace ToolExtensions
             }
 
             Selection.objects = filteredGameObjectsPerCondition.ToArray();
-            _logBox = $"Selected {filteredGameObjectsPerCondition.Count} objects";
+            _logBox = $"Selected {filteredGameObjectsPerCondition.Count} object" + (filteredGameObjectsPerCondition.Count > 1 ? "s" : "");
+
         }
 
         private List<GameObject> InvertSelection(List<GameObject> selectedGameObjects)
