@@ -25,3 +25,7 @@ Batch rename your objects in the scene<br>
 <H2>4 - Replace objects</H2><br>
 <img src="images/replaceobjects_screenshot.jpg" width="300"></img>
 Replace a selection of objects with a specified object or prefab<br>
+
+<H2>5 - Selection filter</H2><br>
+<img src="images/Selectionfilter_screenshot.jpg" width="300"></img>
+Select objects in the scene based on a set of filters like triangle count, tag, layer or material<br>
