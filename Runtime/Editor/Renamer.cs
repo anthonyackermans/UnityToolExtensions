@@ -1,161 +1,164 @@
 ﻿// Anthony Ackermans
-using System;
-using System.Collections;
+
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Find and rename objects in the scene
-/// </summary>
-public class Renamer : EditorWindow
+namespace ToolExtensions
 {
-    // FIELDS
-    private List<TransformElement> _transformelements = new List<TransformElement>();
-    private ObjectGetter _objectGetter = new ObjectGetter();
-    private bool _baseName;
-    private string _baseNameString;
-    private bool _prefix;
-    private bool _suffix;
-    private string _suffixString;
-    private string _prefixString;
-    private bool _removefirstdigits;
-    private bool _numbered;
-    private int _baseNumber = 1;
-    private int _step = 1;
-    private int _removefirstdigitsAmount;
-    private bool _removeLastdigits;
-    private int _removeLastdigitsAmount;
 
-    // Add menu item 
-    [MenuItem("Tools/Renamer")]
-    public static void ShowWindow()
+    /// <summary>
+    /// Find and rename objects in the scene
+    /// </summary>
+    public class Renamer : EditorWindow
     {
-        EditorWindow.GetWindow(typeof(Renamer));
-    }
+        // FIELDS
+        private List<TransformElement> _transformelements = new List<TransformElement>();
+        private ObjectGetter _objectGetter = new ObjectGetter();
+        private bool _baseName;
+        private string _baseNameString;
+        private bool _prefix;
+        private bool _suffix;
+        private string _suffixString;
+        private string _prefixString;
+        private bool _removefirstdigits;
+        private bool _numbered;
+        private int _baseNumber = 1;
+        private int _step = 1;
+        private int _removefirstdigitsAmount;
+        private bool _removeLastdigits;
+        private int _removeLastdigitsAmount;
 
-
-    private void OnGUI()
-    {
-        _transformelements = _objectGetter.ObjectSelectionShowUi("Search for objects");
-        EditorGUILayout.Space(10);
-
-        EditorGUI.BeginDisabledGroup(_baseName);
-        EditorGUILayout.BeginHorizontal();
-        _removefirstdigits = EditorGUILayout.BeginToggleGroup("Remove first digits", _removefirstdigits);
-        _removefirstdigitsAmount = EditorGUILayout.IntField(_removefirstdigitsAmount);
-        EditorGUILayout.EndToggleGroup();
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.BeginHorizontal();
-        _removeLastdigits = EditorGUILayout.BeginToggleGroup("Remove last digits", _removeLastdigits);
-        _removeLastdigitsAmount = EditorGUILayout.IntField(_removeLastdigitsAmount);
-        EditorGUILayout.EndToggleGroup();
-        EditorGUILayout.EndHorizontal();
-        EditorGUI.EndDisabledGroup();
-
-        EditorGUI.BeginDisabledGroup(_removefirstdigits || _removeLastdigits);
-        EditorGUILayout.BeginHorizontal();
-         _baseName = EditorGUILayout.BeginToggleGroup("Base Name", _baseName);
-         _baseNameString = EditorGUILayout.TextField( _baseNameString);
-        EditorGUILayout.EndToggleGroup();
-        EditorGUILayout.EndHorizontal();
-        EditorGUI.EndDisabledGroup();
-
-        EditorGUILayout.BeginHorizontal();
-        _prefix = EditorGUILayout.BeginToggleGroup("Prefix", _prefix);
-        _prefixString = EditorGUILayout.TextField(_prefixString);
-        EditorGUILayout.EndToggleGroup();
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.BeginHorizontal();
-        _suffix = EditorGUILayout.BeginToggleGroup("Suffix", _suffix);
-        _suffixString = EditorGUILayout.TextField(_suffixString);
-        EditorGUILayout.EndToggleGroup();
-        EditorGUILayout.EndHorizontal();     
-
-        _numbered = EditorGUILayout.BeginToggleGroup("Numbered", _numbered);
-        EditorGUI.indentLevel++;
-        _baseNumber = EditorGUILayout.IntField("Base Number",_baseNumber);
-        _step = EditorGUILayout.IntField("Step",_step);
-        EditorGUI.indentLevel--;
-        EditorGUILayout.EndToggleGroup();
-
-        GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Reset Values"))
+        // Add menu item 
+        [MenuItem("Tools/Renamer")]
+        public static void ShowWindow()
         {
-            ResetValues();
+            GetWindow(typeof(Renamer));
         }
-        if (GUILayout.Button("Apply"))
+
+
+        private void OnGUI()
         {
-            RenameObjects();
+            _transformelements = _objectGetter.ObjectSelectionShowUi("Search for objects");
+            EditorGUILayout.Space(10);
+
+            EditorGUI.BeginDisabledGroup(_baseName);
+            EditorGUILayout.BeginHorizontal();
+            _removefirstdigits = EditorGUILayout.BeginToggleGroup("Remove first digits", _removefirstdigits);
+            _removefirstdigitsAmount = EditorGUILayout.IntField(_removefirstdigitsAmount);
+            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            _removeLastdigits = EditorGUILayout.BeginToggleGroup("Remove last digits", _removeLastdigits);
+            _removeLastdigitsAmount = EditorGUILayout.IntField(_removeLastdigitsAmount);
+            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.EndHorizontal();
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUI.BeginDisabledGroup(_removefirstdigits || _removeLastdigits);
+            EditorGUILayout.BeginHorizontal();
+            _baseName = EditorGUILayout.BeginToggleGroup("Base Name", _baseName);
+            _baseNameString = EditorGUILayout.TextField(_baseNameString);
+            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.EndHorizontal();
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.BeginHorizontal();
+            _prefix = EditorGUILayout.BeginToggleGroup("Prefix", _prefix);
+            _prefixString = EditorGUILayout.TextField(_prefixString);
+            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            _suffix = EditorGUILayout.BeginToggleGroup("Suffix", _suffix);
+            _suffixString = EditorGUILayout.TextField(_suffixString);
+            EditorGUILayout.EndToggleGroup();
+            EditorGUILayout.EndHorizontal();
+
+            _numbered = EditorGUILayout.BeginToggleGroup("Numbered", _numbered);
+            EditorGUI.indentLevel++;
+            _baseNumber = EditorGUILayout.IntField("Base Number", _baseNumber);
+            _step = EditorGUILayout.IntField("Step", _step);
+            EditorGUI.indentLevel--;
+            EditorGUILayout.EndToggleGroup();
+
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Reset Values"))
+            {
+                ResetValues();
+            }
+            if (GUILayout.Button("Apply"))
+            {
+                RenameObjects();
+            }
         }
-    }
 
-    private void ResetValues()
-    {
-        _baseName = false;
-        _baseNameString = "";
-        _prefix = false;
-        _prefixString = "";
-        _suffix = false;
-        _suffixString = "";
-        _removefirstdigits = false;
-        _removefirstdigitsAmount = 0;
-        _removeLastdigits = false;
-        _removeLastdigitsAmount = 0;
-        _numbered = false;
-        _baseNumber = 1;
-        _step = 1;
-
-    }
-
-    private void RenameObjects()
-    {
-        
-        int indexNumber = 0;
-        foreach (var te in _transformelements)
+        private void ResetValues()
         {
-            
-            string newName = _removefirstdigits || _removeLastdigits ? "" : te.TheGameObject.name;
+            _baseName = false;
+            _baseNameString = "";
+            _prefix = false;
+            _prefixString = "";
+            _suffix = false;
+            _suffixString = "";
+            _removefirstdigits = false;
+            _removefirstdigitsAmount = 0;
+            _removeLastdigits = false;
+            _removeLastdigitsAmount = 0;
+            _numbered = false;
+            _baseNumber = 1;
+            _step = 1;
 
-            if (_baseName)
+        }
+
+        private void RenameObjects()
+        {
+
+            int indexNumber = 0;
+            foreach (var te in _transformelements)
             {
-                newName = _baseNameString;
+
+                string newName = _removefirstdigits || _removeLastdigits ? "" : te.TheGameObject.name;
+
+                if (_baseName)
+                {
+                    newName = _baseNameString;
+                }
+
+                if (_prefix)
+                {
+                    newName = string.Concat(_prefixString, newName);
+                }
+
+                string newName2 = "";
+                if (_removefirstdigits)
+                {
+                    newName2 = te.TheGameObject.name.Substring(_removefirstdigitsAmount);
+                }
+
+                if (_removeLastdigits)
+                {
+                    newName2 = te.TheGameObject.name.Remove(te.TheGameObject.name.Length - _removeLastdigitsAmount);
+                }
+
+                if (_suffix)
+                {
+                    newName2 = string.Concat(newName2, _suffixString);
+                }
+
+                if (_numbered)
+                {
+                    string format = _transformelements.Count <= 1000 ? "{0:00}" : "{0:000}"; // Format with leading zeros depending on the amount of selected objects
+
+                    newName2 = string.Concat(newName2, "_", string.Format(format, _baseNumber + indexNumber));
+
+                    indexNumber += _step;
+                }
+
+                te.TheGameObject.name = string.Concat(newName, newName2);
+
             }
-
-            if (_prefix)
-            {
-                newName = String.Concat(_prefixString, newName);
-            }
-
-            string newName2 = "";
-            if (_removefirstdigits)
-            {
-               newName2 =  te.TheGameObject.name.Substring(_removefirstdigitsAmount);
-            }
-
-            if (_removeLastdigits)
-            {
-                newName2 = te.TheGameObject.name.Remove(te.TheGameObject.name.Length - _removeLastdigitsAmount);
-            }
-
-            if (_suffix)
-            {
-                newName2 = string.Concat(newName2, _suffixString);
-            }
-
-            if (_numbered)
-            {
-                string format = _transformelements.Count <= 1000 ? "{0:00}" : "{0:000}"; // Format with leading zeros depending on the amount of selected objects
-
-                newName2 = string.Concat(newName2, "_", string.Format(format, _baseNumber + indexNumber));
-
-                indexNumber += _step;
-            }
-
-            te.TheGameObject.name = string.Concat(newName, newName2);
-
         }
     }
 }
