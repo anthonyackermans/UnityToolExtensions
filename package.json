@@ -1,6 +1,6 @@
 {
   "name": "com.anthonyackermans.toolextensions",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "displayName": "Tool Extensions",
   "description": "Set of tools for general use\n- Transform randomizer\n- Drape objects on other objects\n- Renamer\n- Replace objects\n- Selection Filter",
   "unity": "2019.1",
