@@ -31,5 +31,5 @@ Replace a selection of objects with a specified object or prefab<br>
 Select objects in the scene based on a set of filters like triangle count, tag, layer or material<br>
 
 <H2>6 - Array creator</H2><br>
-<img src=".images/Selectionfilter_arrayCreator.jpg" width="300"></img>
-Create an array of objects in 1, 2 or 3 dimensions. This tool is very similar to the array tool from "ds max.<br>
+<img src=".images/arrayCreator_screenshot.jpg" width="300"></img>
+Create an array of objects in 1, 2 or 3 dimensions. This tool is very similar to the array tool from 3ds max.<br>
